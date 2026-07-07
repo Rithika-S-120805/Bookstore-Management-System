@@ -37,40 +37,6 @@ VALUES
 ('Steve Jobs', 'Walter Isaacson', '9781451648539', 720.00, 6, '2011-10-24', NOW(), NOW(), 5);
 
 
--- ===========================
--- INSERT INTO inventory_borrow
--- ===========================
--- Replace user_id values with IDs from your auth_user table.
-
-INSERT INTO inventory_borrow
-(borrow_date, due_date, return_date, status, fine, created_at, updated_at, book_id, user_id)
-VALUES
-
-('2026-07-01', '2026-07-15', NULL,
-'Borrowed', 0.00,
-NOW(), NOW(),
-1, 1),
-
-('2026-06-10', '2026-06-24', '2026-06-26',
-'Returned', 20.00,
-NOW(), NOW(),
-2, 2),
-
-('2026-07-03', '2026-07-17', NULL,
-'Borrowed', 0.00,
-NOW(), NOW(),
-3, 1),
-
-('2026-06-20', '2026-07-04', '2026-07-02',
-'Returned', 0.00,
-NOW(), NOW(),
-4, 2),
-
-('2026-07-05', '2026-07-19', NULL,
-'Borrowed', 0.00,
-NOW(), NOW(),
-5, 1);
-
 
 select * from auth_user;
 
