@@ -162,7 +162,7 @@ def category_delete(request, pk):
 
 
 # Book Views
-@admin_required
+@login_required(login_url='login')
 def book_list(request):
     """Display list of books with pagination, search, filtering, and sorting."""
     queryset = Book.objects.select_related('category').all()
@@ -219,7 +219,7 @@ def book_list(request):
     return render(request, 'book_list.html', context)
 
 
-@admin_required
+@login_required(login_url='login')
 def book_detail(request, pk):
     """Display single book details."""
     book = get_object_or_404(Book, pk=pk)

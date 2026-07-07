@@ -5,123 +5,54 @@
 {% block content %}
 <div class="py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="bi bi-book"></i> Books</h1>
-        {% if user.is_authenticated %}
-        <a href="{% url 'book_create' %}" class="btn btn-success">
-            <i class="bi bi-plus-lg"></i> Add Book
-        </a>
+        <div>
+            <h1 class="mb-1"><i class="bi bi-book"></i> Books</h1>
+            <p class="text-muted mb-0">Simple searchable catalog view.</p>
+        </div>
+        {% if user.is_staff %}
+        <a href="{% url 'book_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Book</a>
         {% endif %}
     </div>
 
-    <!-- Search & Filter Form -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-4">
-                    <input type="text" class="form-control" name="search" placeholder="Search by title, author, ISBN..." value="{{ search_query }}">
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="category">
-                        <option value="">All Categories</option>
-                        {% for category in categories %}
-                        <option value="{{ category.id }}" {% if category.id|stringformat:"s" == category_filter %}selected{% endif %}>
-                            {{ category.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="stock_status">
-                        <option value="">All Stock Status</option>
-                        <option value="in_stock" {% if stock_status_filter == 'in_stock' %}selected{% endif %}>In Stock</option>
-                        <option value="low_stock" {% if stock_status_filter == 'low_stock' %}selected{% endif %}>Low Stock</option>
-                        <option value="out_of_stock" {% if stock_status_filter == 'out_of_stock' %}selected{% endif %}>Out of Stock</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="sort">
-                        <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest</option>
-                        <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title (A-Z)</option>
-                        <option value="-title" {% if sort_by == '-title' %}selected{% endif %}>Title (Z-A)</option>
-                        <option value="price" {% if sort_by == 'price' %}selected{% endif %}>Price (Low)</option>
-                        <option value="-price" {% if sort_by == '-price' %}selected{% endif %}>Price (High)</option>
-                        <option value="stock_quantity" {% if sort_by == 'stock_quantity' %}selected{% endif %}>Stock (Low)</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-search"></i> Filter
-                    </button>
-                </div>
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-lg-4"><label class="form-label">Search</label><input type="text" class="form-control" name="search" placeholder="Title, author, ISBN..." value="{{ search_query }}"></div>
+                <div class="col-lg-2"><label class="form-label">Category</label><select class="form-select" name="category"><option value="">All</option>{% for category in categories %}<option value="{{ category.id }}" {% if category.id|stringformat:"s" == category_filter %}selected{% endif %}>{{ category.name }}</option>{% endfor %}</select></div>
+                <div class="col-lg-2"><label class="form-label">Stock</label><select class="form-select" name="stock_status"><option value="">All</option><option value="in_stock" {% if stock_status_filter == 'in_stock' %}selected{% endif %}>In Stock</option><option value="low_stock" {% if stock_status_filter == 'low_stock' %}selected{% endif %}>Low</option><option value="out_of_stock" {% if stock_status_filter == 'out_of_stock' %}selected{% endif %}>Out</option></select></div>
+                <div class="col-lg-2"><label class="form-label">Sort</label><select class="form-select" name="sort"><option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest</option><option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title</option><option value="-title" {% if sort_by == '-title' %}selected{% endif %}>Title Z-A</option><option value="price" {% if sort_by == 'price' %}selected{% endif %}>Price Low</option><option value="-price" {% if sort_by == '-price' %}selected{% endif %}>Price High</option><option value="stock_quantity" {% if sort_by == 'stock_quantity' %}selected{% endif %}>Stock Low</option></select></div>
+                <div class="col-lg-2 d-grid"><button type="submit" class="btn btn-primary">Filter</button></div>
             </form>
-            {% if search_query or category_filter or stock_status_filter %}
-            <div class="mt-2">
-                <a href="{% url 'book_list' %}" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-x"></i> Clear Filters
-                </a>
-            </div>
-            {% endif %}
         </div>
     </div>
 
-    <!-- Books Table -->
-    {% if books %}
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead class="table-light">
-                <tr>
-                    <th>Title</th>
-                    <th>Author</th>
-                    <th>ISBN</th>
-                    <th>Category</th>
-                    <th>Price</th>
-                    <th>Stock</th>
-                    <th class="text-end">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for book in books %}
-                <tr>
-                    <td>
-                        <a href="{% url 'book_detail' book.id %}" class="text-decoration-none">
-                            {{ book.title }}
-                        </a>
-                    </td>
-                    <td>{{ book.author }}</td>
-                    <td><code>{{ book.isbn }}</code></td>
-                    <td>
-                        <a href="{% url 'category_detail' book.category.id %}">
-                            {{ book.category.name }}
-                        </a>
-                    </td>
-                    <td>${{ book.price|floatformat:2 }}</td>
-                    <td>
-                        <span class="badge bg-{{ book.stock_badge_class }}">
-                            {{ book.stock_quantity }}
-                        </span>
-                    </td>
-                    <td class="text-end">
-                        {% if user.is_authenticated %}
-                        <a href="{% url 'book_edit' book.id %}" class="btn btn-sm btn-warning">
-                            <i class="bi bi-pencil" style="color: white;"></i>
-                        </a>
-                        <a href="{% url 'book_delete' book.id %}" class="btn btn-sm btn-danger">
-                            <i class="bi bi-trash" style="color: white;"></i>
-                        </a>
+    <div class="card">
+        <div class="card-body p-0 table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>Title</th><th>Author</th><th>ISBN</th><th>Category</th><th>Price</th><th>Stock</th>{% if user.is_staff %}<th class="text-end">Actions</th>{% endif %}</tr></thead>
+                <tbody>
+                    {% for book in books %}
+                    <tr>
+                        <td><a href="{% url 'book_detail' book.id %}" class="text-decoration-none fw-semibold">{{ book.title }}</a></td>
+                        <td>{{ book.author }}</td>
+                        <td><code>{{ book.isbn }}</code></td>
+                        <td>{{ book.category.name }}</td>
+                        <td>${{ book.price|floatformat:2 }}</td>
+                        <td><span class="badge bg-{{ book.stock_badge_class }}">{{ book.stock_quantity }}</span></td>
+                        {% if user.is_staff %}
+                        <td class="text-end">
+                            <a href="{% url 'book_edit' book.id %}" class="btn btn-sm btn-warning"><i class="bi bi-pencil text-white"></i></a>
+                            <a href="{% url 'book_delete' book.id %}" class="btn btn-sm btn-danger"><i class="bi bi-trash text-white"></i></a>
+                        </td>
                         {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="{% if user.is_staff %}7{% else %}6{% endif %}" class="text-center text-muted py-5">No books found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <!-- Pagination -->
     {% include 'includes/pagination.html' %}
-    {% else %}
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i> No books found. {% if user.is_authenticated %}<a href="{% url 'book_create' %}">Add one now</a>{% endif %}
-    </div>
-    {% endif %}
 </div>
 {% endblock %}

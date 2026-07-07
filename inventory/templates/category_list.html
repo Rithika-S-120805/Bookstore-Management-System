@@ -5,77 +5,43 @@
 {% block content %}
 <div class="py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="bi bi-tag"></i> Categories</h1>
-        {% if user.is_authenticated %}
-        <a href="{% url 'category_create' %}" class="btn btn-primary">
-            <i class="bi bi-plus-lg"></i> Add Category
-        </a>
-        {% endif %}
+        <div>
+            <h1 class="mb-1"><i class="bi bi-tags"></i> Categories</h1>
+            <p class="text-muted mb-0">Organize the library into clean collections.</p>
+        </div>
+        <a href="{% url 'category_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Category</a>
     </div>
 
-    <!-- Search Form -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <form method="get" class="d-flex gap-2" role="search">
-                <input type="text" class="form-control" name="search" placeholder="Search categories..." value="{{ search_query }}">
-                <button type="submit" class="btn btn-outline-primary">
-                    <i class="bi bi-search"></i> Search
-                </button>
-                {% if search_query %}
-                <a href="{% url 'category_list' %}" class="btn btn-outline-secondary">
-                    <i class="bi bi-x"></i> Clear
-                </a>
-                {% endif %}
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-lg-9"><label class="form-label">Search</label><input type="text" class="form-control" name="search" placeholder="Search categories..." value="{{ search_query }}"></div>
+                <div class="col-lg-3 d-grid"><button type="submit" class="btn btn-outline-primary">Search</button></div>
             </form>
         </div>
     </div>
 
-    <!-- Categories Table -->
-    {% if categories %}
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead class="table-light">
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th class="text-end">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for category in categories %}
-                <tr>
-                    <td>
-                        <strong>
-                            <a href="{% url 'category_detail' category.id %}" class="text-decoration-none">
-                                {{ category.name }}
-                            </a>
-                        </strong>
-                    </td>
-                    <td>
-                        {{ category.description|truncatewords:15|default:"No description" }}
-                    </td>
-                    <td class="text-end">
-                        {% if user.is_authenticated %}
-                        <a href="{% url 'category_edit' category.id %}" class="btn btn-sm btn-warning">
-                            <i class="bi bi-pencil text-white"></i>
-                        </a>
-                        <a href="{% url 'category_delete' category.id %}" class="btn btn-sm btn-danger">
-                            <i class="bi bi-trash text-white"></i>
-                        </a>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="card">
+        <div class="card-body p-0 table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>Name</th><th>Description</th><th class="text-end">Actions</th></tr></thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td><a href="{% url 'category_detail' category.id %}" class="text-decoration-none fw-semibold">{{ category.name }}</a></td>
+                        <td>{{ category.description|default:'No description'|truncatewords:16 }}</td>
+                        <td class="text-end">
+                            <a href="{% url 'category_edit' category.id %}" class="btn btn-sm btn-warning"><i class="bi bi-pencil text-white"></i></a>
+                            <a href="{% url 'category_delete' category.id %}" class="btn btn-sm btn-danger"><i class="bi bi-trash text-white"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center text-muted py-5">No categories found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <!-- Pagination -->
     {% include 'includes/pagination.html' %}
-    {% else %}
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i> No categories found. {% if user.is_authenticated %}<a href="{% url 'category_create' %}">Create one now</a>{% endif %}
-    </div>
-    {% endif %}
 </div>
 {% endblock %}

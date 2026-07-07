@@ -1,53 +1,102 @@
-<!-- Sidebar Navigation -->
-<nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
-    <div class="position-sticky pt-3">
+<nav class="col-md-3 col-lg-2 d-md-block sidebar">
+
+    <div class="position-sticky d-flex flex-column h-100">
+
+        
+
         {% if user.is_authenticated %}
+
+        <small class="sidebar-heading">Overview</small>
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+                <a class="nav-link sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                   href="{% url 'dashboard' %}">
                     <i class="bi bi-speedometer2"></i>
-                    <span>Dashboard</span>
+                    Dashboard
                 </a>
             </li>
-            {% if user.is_staff %}
-            <li class="nav-item">
-                <a class="nav-link {% if 'category' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'category_list' %}">
-                    <i class="bi bi-tags"></i>
-                    <span>Categories</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if 'book' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'book_list' %}">
-                    <i class="bi bi-book"></i>
-                    <span>Books</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if 'inventory' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'inventory' %}">
-                    <i class="bi bi-boxes"></i>
-                    <span>Inventory</span>
-                </a>
-            </li>
-            {% endif %}
         </ul>
-        <hr class="my-3">
-        <div class="px-3 py-2">
-            <p class="text-muted small mb-2">Logged in as</p>
-            <div class="d-flex align-items-center">
-                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
-                    <i class="bi bi-person-fill"></i>
-                </div>
-                <div>
-                    <p class="small mb-0 fw-600">{{ user.username }}</p>
-                    <p class="small mb-0 text-muted">{% if user.is_staff %}Admin{% else %}User{% endif %}</p>
-                </div>
-            </div>
-        </div>
+
+        {% if user.is_staff %}
+
+        <small class="sidebar-heading">Business</small>
+        <ul class="nav flex-column">
+
+            <li class="nav-item">
+                <a class="nav-link sidebar-link {% if 'category' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'category_list' %}">
+                    <i class="bi bi-tags-fill"></i>
+                    Categories
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link sidebar-link {% if 'book' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'book_list' %}">
+                    <i class="bi bi-book-fill"></i>
+                    Books
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link sidebar-link {% if request.resolver_match.url_name == 'inventory' %}active{% endif %}"
+                   href="{% url 'inventory' %}">
+                    <i class="bi bi-box-seam-fill"></i>
+                    Inventory
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link sidebar-link {% if request.resolver_match.url_name == 'issue_book' %}active{% endif %}"
+                   href="{% url 'issue_book' %}">
+                    <i class="bi bi-journal-plus"></i>
+                    Issue Book
+                </a>
+            </li>
+
+        </ul>
+
         {% else %}
-        <div class="alert alert-info small text-center mx-2">
-            <i class="bi bi-info-circle"></i>
-            <p class="mb-2">Please <a href="{% url 'login' %}" class="alert-link">login</a> to access inventory management.</p>
-        </div>
+
+        <small class="sidebar-heading">Library</small>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link sidebar-link {% if 'book' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'book_list' %}">
+                    <i class="bi bi-book"></i>
+                    Browse Books
+                </a>
+            </li>
+        </ul>
+
         {% endif %}
+
+        <div class="mt-auto px-3 pb-3">
+
+            <div class="sidebar-user-card px-2 py-2 mb-2 rounded-3 d-flex align-items-center gap-2">
+                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center flex-shrink-0"
+                     style="width:34px;height:34px;">
+                    <i class="bi bi-person-fill text-white" style="font-size:15px;"></i>
+                </div>
+                <div class="sidebar-user-name mb-0">{{ user.username }}</div>
+            </div>
+
+            <a href="{% url 'logout' %}" class="btn btn-danger w-100 btn-sm">
+                <i class="bi bi-box-arrow-right"></i>
+                Logout
+            </a>
+        </div>
+
+        {% else %}
+
+        <div class="text-center p-4">
+            <i class="bi bi-person-circle display-4 text-secondary"></i>
+            <p class="text-white mt-3">Please login to continue.</p>
+            <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+        </div>
+
+        {% endif %}
+
     </div>
+
 </nav>
