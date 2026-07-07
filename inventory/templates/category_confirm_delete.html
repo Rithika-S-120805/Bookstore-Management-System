@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Category - Bookstore Inventory{% endblock %}
+
+{% block content %}
+<div class="py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="card-title mb-0"><i class="bi bi-exclamation-triangle"></i> Delete Category</h4>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">
+                        Are you sure you want to delete the category <strong>{{ category.name }}</strong>?
+                    </p>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Warning:</strong> This action cannot be undone. All books in this category will be deleted as well.
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <form method="post" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Yes, Delete
+                        </button>
+                        <a href="{% url 'category_detail' category.id %}" class="btn btn-secondary">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

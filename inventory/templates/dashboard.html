@@ -1,0 +1,394 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Bookstore Inventory{% endblock %}
+
+{% block content %}
+<div class="py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="mb-1"><i class="bi bi-speedometer2"></i> Dashboard</h1>
+            <p class="text-muted mb-0">{% if is_admin_dashboard %}Admin overview and borrowing control{% else %}Your borrowing activity and history{% endif %}</p>
+        </div>
+    </div>
+
+    {% if is_admin_dashboard %}
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-2 mb-3">
+            <div class="card bg-primary text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title text-uppercase mb-2 opacity-75">Total Books</h6>
+                    <h2 class="card-text mb-0">{{ stats.total_books }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-2 mb-3">
+            <div class="card bg-success text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title text-uppercase mb-2 opacity-75">Available Books</h6>
+                    <h2 class="card-text mb-0">{{ stats.available_books }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-2 mb-3">
+            <div class="card bg-info text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title text-uppercase mb-2 opacity-75">Borrowed Books</h6>
+                    <h2 class="card-text mb-0">{{ stats.borrowed_books }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-2 mb-3">
+            <div class="card bg-secondary text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title text-uppercase mb-2 opacity-75">Returned Books</h6>
+                    <h2 class="card-text mb-0">{{ stats.returned_books }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-2 mb-3">
+            <div class="card bg-warning text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title text-uppercase mb-2 opacity-75">Overdue Books</h6>
+                    <h2 class="card-text mb-0">{{ stats.overdue_books }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-2 mb-3">
+            <div class="card bg-dark text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title text-uppercase mb-2 opacity-75">Total Users</h6>
+                    <h2 class="card-text mb-0">{{ stats.total_users }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0"><i class="bi bi-journal-plus"></i> Issue Book</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'issue_book' %}" class="row g-3">
+                        {% csrf_token %}
+                        <div class="col-12">
+                            <label class="form-label">User</label>
+                            {{ issue_form.user }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Book</label>
+                            {{ issue_form.book }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Due Date</label>
+                            {{ issue_form.due_date }}
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Issue Book</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0"><i class="bi bi-clock-history"></i> Recent Borrow Activity</h5>
+                </div>
+                <div class="card-body table-responsive">
+                    {% if stats.recent_activity %}
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Book</th>
+                                <th>Status</th>
+                                <th>Due</th>
+                                <th class="text-end">Fine</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for borrow in stats.recent_activity %}
+                            <tr>
+                                <td>{{ borrow.user.username|default:"Deleted User" }}</td>
+                                <td>{{ borrow.book.title|default:"Deleted Book" }}</td>
+                                <td>
+                                    {% if borrow.display_status == 'Overdue' %}
+                                    <span class="badge bg-danger">Overdue</span>
+                                    {% elif borrow.display_status == 'Returned' %}
+                                    <span class="badge bg-success">Returned</span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark">Borrowed</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ borrow.due_date }}</td>
+                                <td class="text-end">${{ borrow.fine|floatformat:2 }}</td>
+                                <td class="text-end">
+                                    {% if borrow.status == 'Borrowed' and not borrow.return_date %}
+                                    <form method="post" action="{% url 'return_book' borrow.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-success">Return</button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-muted">Completed</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="text-muted mb-0">No borrow activity yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0"><i class="bi bi-pie-chart"></i> Books per Category</h5>
+                </div>
+                <div class="card-body">
+                    {% if books_per_category %}
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th class="text-end">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category in books_per_category %}
+                            <tr>
+                                <td><a href="{% url 'category_detail' category.id %}">{{ category.name }}</a></td>
+                                <td class="text-end"><span class="badge bg-primary">{{ category.book_count }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="text-muted">No categories yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0"><i class="bi bi-exclamation-triangle"></i> Low Stock Books</h5>
+                </div>
+                <div class="card-body">
+                    {% if low_stock_books %}
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Book Title</th>
+                                <th class="text-end">Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for book in low_stock_books %}
+                            <tr>
+                                <td><a href="{% url 'book_detail' book.id %}">{{ book.title }}</a></td>
+                                <td class="text-end"><span class="badge bg-{{ book.stock_badge_class }}">{{ book.stock_quantity }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="text-muted">All books have sufficient stock.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card bg-primary text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title text-uppercase mb-2 opacity-75">Currently Borrowed</h6>
+                    <h2 class="card-text mb-0">{{ stats.currently_borrowed }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card bg-success text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title text-uppercase mb-2 opacity-75">Returned Books</h6>
+                    <h2 class="card-text mb-0">{{ stats.returned_books }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card bg-warning text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title text-uppercase mb-2 opacity-75">Due Books</h6>
+                    <h2 class="card-text mb-0">{{ stats.due_books }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card bg-danger text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title text-uppercase mb-2 opacity-75">Overdue Books</h6>
+                    <h2 class="card-text mb-0">{{ stats.overdue_books }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0"><i class="bi bi-journal-bookmark"></i> Currently Borrowed Books</h5>
+                </div>
+                <div class="card-body table-responsive">
+                    {% if current_borrows %}
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Book</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for borrow in current_borrows %}
+                            <tr>
+                                <td>{{ borrow.book.title|default:"Deleted Book" }}</td>
+                                <td>{{ borrow.due_date }}</td>
+                                <td><span class="badge bg-warning text-dark">{{ borrow.display_status }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="text-muted mb-0">You do not have any active borrows.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0"><i class="bi bi-exclamation-circle"></i> Overdue Books</h5>
+                </div>
+                <div class="card-body table-responsive">
+                    {% if overdue_borrows %}
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Book</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for borrow in overdue_borrows %}
+                            <tr>
+                                <td>{{ borrow.book.title|default:"Deleted Book" }}</td>
+                                <td>{{ borrow.due_date }}</td>
+                                <td><span class="badge bg-danger">{{ borrow.display_status }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="text-muted mb-0">You have no overdue books.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0"><i class="bi bi-arrow-return-left"></i> Returned Books</h5>
+                </div>
+                <div class="card-body table-responsive">
+                    {% if returned_borrows %}
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Book</th>
+                                <th>Borrow Date</th>
+                                <th>Return Date</th>
+                                <th>Fine</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for borrow in returned_borrows %}
+                            <tr>
+                                <td>{{ borrow.book.title|default:"Deleted Book" }}</td>
+                                <td>{{ borrow.borrow_date }}</td>
+                                <td>{{ borrow.return_date }}</td>
+                                <td>${{ borrow.fine|floatformat:2 }}</td>
+                                <td><span class="badge bg-success">{{ borrow.display_status }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="text-muted mb-0">You have no returned books yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0"><i class="bi bi-clock-history"></i> Borrow History</h5>
+                </div>
+                <div class="card-body table-responsive">
+                    {% if borrow_history %}
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Book</th>
+                                <th>Borrow Date</th>
+                                <th>Due Date</th>
+                                <th>Return Date</th>
+                                <th>Fine</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for borrow in borrow_history %}
+                            <tr>
+                                <td>{{ borrow.book.title|default:"Deleted Book" }}</td>
+                                <td>{{ borrow.borrow_date }}</td>
+                                <td>{{ borrow.due_date }}</td>
+                                <td>{{ borrow.return_date|default:"-" }}</td>
+                                <td>${{ borrow.fine|floatformat:2 }}</td>
+                                <td>
+                                    {% if borrow.display_status == 'Overdue' %}
+                                    <span class="badge bg-danger">Overdue</span>
+                                    {% elif borrow.display_status == 'Returned' %}
+                                    <span class="badge bg-success">Returned</span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark">Borrowed</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="text-muted mb-0">No borrowing history yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

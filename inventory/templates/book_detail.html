@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ book.title }} - Bookstore Inventory{% endblock %}
+
+{% block content %}
+<div class="py-4">
+    <div class="mb-4">
+        <a href="{% url 'book_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to Books
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4 border-0">
+                <div class="card-header" style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.08) 0%, rgba(212, 175, 55, 0.03) 100%); border-bottom: 1px solid #E0E6ED;">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h2 class="card-title mb-1" style="color: #1E3A5F; font-weight: 700;">{{ book.title }}</h2>
+                            <p class="text-muted mb-0" style="font-size: 0.95rem;">by <strong>{{ book.author }}</strong></p>
+                        </div>
+                        <span class="badge bg-{{ book.stock_badge_class }} p-2" style="font-size: 0.85rem;">
+                            {% if book.stock_quantity == 0 %}
+                                <i class="bi bi-exclamation-circle"></i> Out of Stock
+                            {% elif book.stock_quantity <= 10 %}
+                                <i class="bi bi-exclamation-triangle"></i> Low Stock
+                            {% else %}
+                                <i class="bi bi-check-circle"></i> In Stock
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Key Information Grid -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="ps-3" style="border-left: 3px solid #D4AF37;">
+                                <p class="text-muted mb-1"><small><i class="bi bi-receipt"></i> ISBN</small></p>
+                                <code class="fs-6">{{ book.isbn }}</code>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="ps-3" style="border-left: 3px solid #D4AF37;">
+                                <p class="text-muted mb-1"><small><i class="bi bi-tags"></i> Category</small></p>
+                                <a href="{% url 'category_detail' book.category.id %}" class="text-decoration-none fw-500">
+                                    {{ book.category.name }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="ps-3" style="border-left: 3px solid #27AE60;">
+                                <p class="text-muted mb-1"><small><i class="bi bi-tag"></i> Price</small></p>
+                                <h4 style="color: #27AE60; margin-bottom: 0;">${{ book.price|floatformat:2 }}</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="ps-3" style="border-left: 3px solid #3498DB;">
+                                <p class="text-muted mb-1"><small><i class="bi bi-box"></i> Stock Quantity</small></p>
+                                <h4 style="color: #3498DB; margin-bottom: 0;">{{ book.stock_quantity }} units</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="ps-3" style="border-left: 3px solid #E74C3C;">
+                                <p class="text-muted mb-1"><small><i class="bi bi-calculator"></i> Inventory Value</small></p>
+                                <h4 style="color: #E74C3C; margin-bottom: 0;">${{ book.inventory_value|floatformat:2 }}</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="ps-3" style="border-left: 3px solid #F39C12;">
+                                <p class="text-muted mb-1"><small><i class="bi bi-calendar"></i> Published</small></p>
+                                <p class="mb-0" style="font-weight: 500;">{{ book.publication_date|date:"F d, Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer" style="background-color: rgba(30, 58, 95, 0.03); border-top: 1px solid #E0E6ED;">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'book_edit' book.id %}" class="btn btn-warning btn-sm">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <a href="{% url 'book_delete' book.id %}" class="btn btn-danger btn-sm">
+                        <i class="bi bi-trash"></i> Delete
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header" style="background: linear-gradient(135deg, rgba(30, 58, 95, 0.08) 0%, rgba(212, 175, 55, 0.03) 100%); border-bottom: 1px solid #E0E6ED;">
+                    <h5 class="card-title mb-0" style="color: #1E3A5F;">Additional Information</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-3 pb-3 border-bottom">
+                            <small class="text-muted d-block mb-1"><i class="bi bi-clock"></i> Created</small>
+                            <strong class="text-muted" style="font-size: 0.9rem;">{{ book.created_at|date:"F d, Y" }}</strong><br>
+                            <small class="text-muted">{{ book.created_at|time:"H:i" }}</small>
+                        </li>
+                        <li class="mb-3 pb-3 border-bottom">
+                            <small class="text-muted d-block mb-1"><i class="bi bi-pencil-square"></i> Last Updated</small>
+                            <strong class="text-muted" style="font-size: 0.9rem;">{{ book.updated_at|date:"F d, Y" }}</strong><br>
+                            <small class="text-muted">{{ book.updated_at|time:"H:i" }}</small>
+                        </li>
+                        <li class="mb-0">
+                            <small class="text-muted d-block mb-2"><i class="bi bi-exclamation-circle"></i> Current Status</small>
+                            {% if book.stock_quantity == 0 %}
+                                <span class="badge bg-danger">Out of Stock</span>
+                            {% elif book.stock_quantity <= 10 %}
+                                <span class="badge bg-warning">Low Stock - Reorder Soon</span>
+                            {% else %}
+                                <span class="badge bg-success">In Stock</span>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

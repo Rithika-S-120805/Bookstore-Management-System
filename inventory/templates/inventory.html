@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventory - Bookstore Management{% endblock %}
+
+{% block content %}
+<div class="py-4">
+    <h1 class="mb-4"><i class="bi bi-box"></i> Inventory Management</h1>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title text-muted mb-2">Total Books</h6>
+                    <h3 class="mb-0">{{ stats.total_books }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title text-muted mb-2">Total Stock</h6>
+                    <h3 class="mb-0">{{ stats.total_stock }} units</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title text-muted mb-2">Total Value</h6>
+                    <h3 class="mb-0 text-success">${{ stats.total_value|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title text-muted mb-2">Low Stock</h6>
+                    <h3 class="mb-0 text-warning">{{ stats.low_stock_count }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Filter Form -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-5">
+                    <input type="text" class="form-control" name="search" placeholder="Search books..." value="{{ search_query }}">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="stock_status">
+                        <option value="">All Stock Status</option>
+                        <option value="in_stock" {% if stock_status_filter == 'in_stock' %}selected{% endif %}>In Stock (>10)</option>
+                        <option value="low_stock" {% if stock_status_filter == 'low_stock' %}selected{% endif %}>Low Stock (≤10)</option>
+                        <option value="out_of_stock" {% if stock_status_filter == 'out_of_stock' %}selected{% endif %}>Out of Stock (=0)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{% url 'inventory' %}" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-arrow-clockwise"></i> Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Inventory Table -->
+    {% if books %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Book Title</th>
+                    <th>Author</th>
+                    <th>Category</th>
+                    <th class="text-end">Stock</th>
+                    <th class="text-end">Price</th>
+                    <th class="text-end">Value</th>
+                    <th class="text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                <tr>
+                    <td>
+                        <a href="{% url 'book_detail' book.id %}" class="text-decoration-none">
+                            {{ book.title }}
+                        </a>
+                    </td>
+                    <td>{{ book.author }}</td>
+                    <td>
+                        <a href="{% url 'category_detail' book.category.id %}" class="text-decoration-none">
+                            {{ book.category.name }}
+                        </a>
+                    </td>
+                    <td class="text-end">
+                        <strong>{{ book.stock_quantity }}</strong>
+                    </td>
+                    <td class="text-end">${{ book.price|floatformat:2 }}</td>
+                    <td class="text-end">
+                        <strong class="text-info">${{ book.inventory_value|floatformat:2 }}</strong>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-{{ book.stock_info.badge_class }} p-2">
+                            {{ book.stock_info.icon }} {{ book.stock_info.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot class="table-light">
+                <tr>
+                    <th colspan="3" class="text-end">TOTAL:</th>
+                    <th class="text-end">{{ stats.total_stock }} units</th>
+                    <th></th>
+                    <th class="text-end text-success"><strong>${{ stats.total_value|floatformat:2 }}</strong></th>
+                    <th></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% include 'includes/pagination.html' %}
+    {% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> No books found in inventory.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

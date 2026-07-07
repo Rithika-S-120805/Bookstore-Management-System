@@ -21,7 +21,7 @@ A Django-based inventory management system for bookstores, featuring category ma
 ## Technology Stack
 
 - **Backend**: Django 5.0.1
-- **Database**: SQLite
+- **Database**: MySQL
 - **Frontend**: HTML, CSS, Bootstrap 5
 - **ORM**: Django ORM
 - **Authentication**: Django built-in auth system
@@ -31,7 +31,7 @@ A Django-based inventory management system for bookstores, featuring category ma
 ```
 bookstore/                    # Django project folder
 ├── manage.py               # Django management script
-├── db.sqlite3              # SQLite database (created after migration)
+├── db.sqlite3              # Legacy SQLite file; MySQL is the configured backend
 ├── requirements.txt        # Python dependencies
 ├── bookstore/              # Main project configuration
 │   ├── settings.py         # Project settings
